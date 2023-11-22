@@ -10,8 +10,6 @@ Windows
 
 下载安装
 
-123456
-
 Centos
 
 ```
