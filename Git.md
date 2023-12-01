@@ -37,7 +37,7 @@ git -v
 
 ```
 # 如果用户名中间有空格，需要加双引号
-git config --global user.name "peppapig"
+git config --global user.name "PeppaPig0o0"
 git config --global user.email t13299001916@gmail.com
 
 # global 全局配置
@@ -168,7 +168,7 @@ git diff --cache
 #### 查看两个版本之间的差异
 
 ```
-git diff 提交ID 提交ID
+git diff 提交ID 提交ID--
 git diff HEAD 提交ID
 git diff HEAD~ HEAD
 
@@ -189,7 +189,7 @@ git diff HEAD~ HEAD filename
 rm 文件名              本地(工作区)删除一个文件
 git add 文件名         提交到暂存区
 git ls-files            查看暂存区文件
-git commit -m ""      最后提交
+git commit -m ""     提交
 ```
 
 方法二（推荐）
@@ -435,3 +435,6 @@ git config --global --add safe.directory "*";
 
 ![image-20231102104113653](E:\笔记\Git.assets\image-20231102104113653.png)
 
+多人协同错误，权限
+
+![image-20231127100757139](E:\笔记\assets\image-20231127100757139.png)
