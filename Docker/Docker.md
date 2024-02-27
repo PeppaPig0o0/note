@@ -207,18 +207,20 @@ docker run -d -p 80:8005 myimage/web1:1.0.1
 **建议：宿主机后台进程运行+容器前台进程运行**
 
 ```
-# 例如，这种后台启动的nginx进程，容器创建后会立即销毁
+# 例如，如果在容器内，后台启动的nginx进程，容器创建后会立即销毁
 systemctl start nginx
 ```
 
 ```
-# 应该
+# 应该，前台进程阻塞
 nginx -c /etc/nginx/nginx.conf -g 'daemon off;'
 ```
 
 - 创建时进入容器
 
 ```python
+# 在创建容器时，直接接入容器，进入bash
+# 如果退出bash时，容器内没有前台进程，容器创建后会立即销毁
 docker run -ti --rm myimage/web1:1.0.1 bash
 docker run -ti --rm myimage/web1:1.0.1 sh
         
@@ -285,13 +287,13 @@ WORKDIR /path
 RUN linux命令
 
 # ENV 环境变量，给路径起一个别名
-ENV <key> <value>     ENV <key>=<value>
+ENV <key> <value>    或  ENV <key>=<value>
 # 例
 ENV XXX /data/www
 RUN mkdir $XX/abc
 ADD test $XX/abc
 
-# EXPOST 映射端口（可以不谢）
+# EXPOST 映射端口（可以不写）
 EXPOST 80
 ```
 
@@ -303,6 +305,13 @@ CMD ["python3", "app.py"]
 ENTRYPOINT ["python3", "app.py"]
 # CMD可以被docker run命令覆盖掉，
 ```
+
+#### 减小镜像大小
+
+1. 每个RUN都会在容器上多封装一层,最好整合多个RUN语句为一行
+2. 已经安装好的程序,删除安装包
+
+#### 文件挂载
 
 
 
@@ -346,6 +355,7 @@ docker images
 ### Dockerfile
 
 ```shell
+
 # Dockerfile
 
 # Base images 基础镜像
@@ -357,11 +367,9 @@ MAINTAINER peppapig t13299001916@gmail.com
 # RUN sed -i "s/httpredir.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
 # RUN sed -i "s/security.debian.org/mirrors.aliyun.com\/debian-security/g" /etc/apt/sources.list
 
-# GCC编译器
-RUN yum install gcc -y
 
-# Python依赖
-RUN yum install -y zlib zlib-devel bzip2 bzip2-devel ncurses ncurses-devel readline readline-devel openssl openssl-devel  xz lzma xz-devel sqlite sqlite-devel gdbm gdbm-devel tk tk-devel  mysql-devel python-devel libffi-devel
+# Python依赖(GCC编译器)
+RUN yum install -y gcc zlib zlib-devel bzip2 bzip2-devel ncurses ncurses-devel readline readline-devel openssl openssl-devel  xz lzma xz-devel sqlite sqlite-devel gdbm gdbm-devel tk tk-devel  mysql-devel python-devel libffi-devel
 
 # wget
 RUN yum install wget -y
@@ -475,9 +483,11 @@ docker run \
 -p 3306:3306 \
 --name mysql57 \
 -v ~/mysql/data:/var/lib/mysql \
+-v /etc/localtime:/etc/localtime:ro \
 -e MYSQL_ROOT_PASSWORD=007741ak \
 --privileged=true \
 docker.io/mysql:5.7.43
+
 ```
 
 ```shell
@@ -486,6 +496,7 @@ docker run \
 -p 3306:3306 \
 --name mysql57 \  # 容器名字
 -v ~/mysql/data:/var/lib/mysql \  # 文件挂载
+-v /etc/localtime:/etc/localtime:ro \  # 修改容器时间为宿主机时间
 -e MYSQL_ROOT_PASSWORD=123456 \  # root密码
 -- privileged=true \   # 权限
 docker.io/mysql:5.7.43  
@@ -524,6 +535,7 @@ docker run \
 --name redis72 \
 -v ~/redis/myredis/myredis.conf:/etc/redis/redis.conf \
 -v ~/redis/myredis/data:/data \
+-v /etc/localtime:/etc/localtime:ro \
 -d redis:7.2.1 redis-server /etc/redis/redis.conf \
 --appendonly yes \
 --requirepass 007741ak
@@ -535,8 +547,8 @@ docker run \
 --restart=always \   # 启动方式，开机启动
 --log-opt max-size=100m \   # 日志配置
 --log-opt max-file=2 \
--p 6379:6379 \
---name redis72 \
+-p 6379:6379 \  # 暴露端口号
+--name redis72 \  # 容器名
 -v ~/redis/myredis/myredis.conf:/etc/redis/redis.conf \
 -v ~/redis/myredis/data:/data \
 -d redis:7.2.1 redis-server /etc/redis/redis.conf \  # Redis使用配置文件启动
@@ -574,14 +586,9 @@ MAINTAINER peppapig t13299001916@gmail.com
 # RUN sed -i "s/httpredir.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
 # RUN sed -i "s/security.debian.org/mirrors.aliyun.com\/debian-security/g" /etc/apt/sources.list
 
-# GCC编译器
-RUN yum install gcc -y
 
 # Python依赖
-RUN yum install -y zlib zlib-devel bzip2 bzip2-devel ncurses ncurses-devel readline readline-devel openssl openssl-devel  xz lzma xz-devel sqlite sqlite-devel gdbm gdbm-devel tk tk-devel  mysql-devel python-devel libffi-devel
-
-# wget
-RUN yum install wget -y
+RUN yum install -y gcc zlib zlib-devel bzip2 bzip2-devel ncurses ncurses-devel readline readline-devel openssl openssl-devel  xz lzma xz-devel sqlite sqlite-devel gdbm gdbm-devel tk tk-devel  mysql-devel python-devel libffi-devel wget
 
 # 目录
 RUN mkdir -p /www/
@@ -620,7 +627,7 @@ docker build -t cocacola137/centos78python39:1.0.1 . -f Dockerfile --no-cache
 ```
 
 ```shell
-# 进入容器，退出后删除容器
+# -it进入容器，--rm退出后删除容器
 docker run -it --rm -p 8010:8010 --privileged cocacola137/centos78python39:1.0.1 bash 
 ```
 
@@ -641,7 +648,7 @@ FROM cocacola137/centos78python39:1.0.1
 #MAINTAINER 维护者信息
 MAINTAINER peppapig t13299001916@gmail.com
 
-RUN git config --global user.name "peppapig"
+RUN git config --global user.name "PeppaPig0o0"
 RUN git config --global user.email "t13299001916@gmail.com"
 
 # git拉代码
@@ -664,6 +671,129 @@ ENTRYPOINT ["/www/wwwroot/start.sh"]
 docker build -t cocacola137/wwwroot:1.0.1 . -f Dockerfile --no-cache
 ```
 
+
+
+
+
+### job项目
+
+域名tdnote.top
+
+```bash
+#Dockerfile
+
+# Base images 基础镜像
+FROM cocacola137/centos78python39:1.0.1
+#MAINTAINER 维护者信息
+MAINTAINER peppapig t13299001916@gmail.com
+
+#RUN git config --global user.name "PeppaPig0o0"
+#RUN git config --global user.email "t13299001916@gmail.com"
+
+# COPY
+COPY ./job /www/job
+
+WORKDIR /www/job
+RUN pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN ln -s /usr/local/python3/python39/bin/uwsgi /usr/bin/uwsgi
+
+# 运行项目
+WORKDIR /www/job
+EXPOSE 8000
+
+# 使用Bash脚本作为入口点
+# ENTRYPOINT ["/www/wwwroot/start.sh"]
+```
+
+```
+docker build -t peppapig010/job:1.0.1 . -f Dockerfile --no-cache
+```
+
+```
+# 进入容器，退出后删除容器 宿主机端口:容器端口
+docker run -it -p 8001:8000 --privileged peppapig010/job:1.0.1 bash 
+```
+
+### peppa项目
+
+域名ipeppapig.top
+
+```bash
+#Dockerfile
+
+# Base images 基础镜像
+FROM cocacola137/centos78python39:1.0.1
+#MAINTAINER 维护者信息
+MAINTAINER peppapig t13299001916@gmail.com
+
+#RUN git config --global user.name "PeppaPig0o0"
+#RUN git config --global user.email "t13299001916@gmail.com"
+
+# COPY
+COPY ./peppa /www/peppa
+
+WORKDIR /www/peppa
+RUN pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN ln -s /usr/local/python3/python39/bin/uwsgi /usr/bin/uwsgi
+
+# 运行项目
+WORKDIR /www/peppa/peppa
+RUN uwsgi -i peppa.ini
+EXPOSE 8000
+
+# 使用Bash脚本作为入口点
+# ENTRYPOINT ["/www/wwwroot/start.sh"]
+```
+
+```
+docker build -t peppapig010/peppa:1.0.1 . -f Dockerfile --no-cache
+```
+
+```
+docker run -d -p 8002:8000 --privileged peppapig010/peppa:1.0.1
+# 进入容器，退出后删除容器 宿主机端口:容器端口
+docker run -it -p 8002:8000 --privileged peppapig010/peppa:1.0.1 bash 
+```
+
+```
+docker run -it -p 8002:8000 --privileged peppapig010/peppa:1.0.1 tail -20f /www/peppa/peppa/uwsgi.log 
+```
+
+
+
+### 以前的
+
+```
+# Dockerfile
+
+# Base images 基础镜像
+FROM cocacola137/centos78python39:1.0.1
+#MAINTAINER 维护者信息
+MAINTAINER peppapig t13299001916@gmail.com
+
+# git拉代码
+COPY ./wwwroot /www/wwwroot
+
+WORKDIR /www/peppa
+# COPY ./requirements.txt /www/wwwroot/peppa
+RUN pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN ln -s /usr/local/python3/python39/bin/uwsgi /usr/bin/uwsgi
+
+# 运行项目
+WORKDIR /www/wwwroot
+EXPOSE 8010 8011
+
+# 使用Bash脚本作为入口点
+# ENTRYPOINT ["/www/wwwroot/start.sh"]
+
+
+```
+
+
+
 start.sh
 
 ```sh
@@ -683,7 +813,12 @@ tail -f /dev/null
 ```
 
 ```
-# 进入容器，退出后删除容器
+# 进入容器，退出后删除容器 宿主机端口:容器端口
 docker run -it --rm -p 8010:8010 -p 8011:8011 --privileged cocacola137/wwwroot:1.0.1 bash 
+```
+
+```
+# 进入容器，退出后删除容器 宿主机端口:容器端口
+docker run -it -p 8012:8010 --privileged cocacola137/wwwroot:1.0.1 bash 
 ```
 

@@ -28,7 +28,7 @@ wsl --install --distribution Debian
 
 ***弃用*** https://github.com/DDoSolitary/LxRunOffline/releases # 官方版本会出错
 
-<img src="E:\笔记\assets\image-20231201092141844.png" alt="image-20231201092141844" style="zoom: 33%;" />
+<img src="E:\笔记\WSL\assets\image-20231201092141844.png" alt="image-20231201092141844" style="zoom: 33%;" />
 
 ***改用这个地址***
 
@@ -44,7 +44,7 @@ https://github.com/Andy1208-lee/LxRunOffline/blob/main/LxRunOffline-v3.5.0-11-gf
 $ .\LxRunOffline.exe l
 ```
 
-<img src="E:\笔记\assets\image-20231201092349779.png" alt="image-20231201092349779" style="zoom:50%;" />
+<img src="E:\笔记\WSL\assets\image-20231201092349779.png" alt="image-20231201092349779" style="zoom:50%;" />
 
 ```
 .\LxRunOffline.exe d  -n Ubuntu-20.04 -d D:\wsl\Ubuntu-20.04-01\ -N Ubuntu-20.04-01
@@ -60,14 +60,14 @@ wslconfig /l
 或   wsl --list
 ```
 
-<img src="E:\笔记\assets\image-20231201092848278.png" alt="image-20231201092848278" style="zoom: 50%;" />
+<img src="E:\笔记\WSL\assets\image-20231201092848278.png" alt="image-20231201092848278" style="zoom: 50%;" />
 
 ```
 # 删除对应系统
 wslconfig /u Ubuntu-20.04-01
 ```
 
-![image-20231201092947250](E:\笔记\assets\image-20231201092947250.png)
+![image-20231201092947250](E:\笔记\WSL\assets\image-20231201092947250.png)
 
 可以再输入wslconfig /l检查一下，确认注销成功
 

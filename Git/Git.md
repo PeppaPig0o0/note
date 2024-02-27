@@ -4,7 +4,9 @@ Git
 安装
 ----
 
-https://git-scm.com/ 官网
+1220230601005438
+
+11040102700068
 
 Windows
 
@@ -249,12 +251,15 @@ GitHub
 
 ### SSH配置
 
-```
+```bash
 项目根目录下
 ssh-keygen -t rsa -b 4096
+ssh-keygen -t rsa -b 4096 -C "t13299001916@gmail.com"  # github绑定邮箱
 ```
 
 ![image-20231004150251643](Git.assets/image-20231004150251643.png)
+
+![image-20231229153151780](E:\笔记\Git\Git.assets\image-20231229153151780.png)
 
 如果第一次生成，直接回车，生成id_rsa文件
 

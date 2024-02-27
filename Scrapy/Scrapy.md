@@ -66,6 +66,41 @@ scrapy crawl first
 #ROBOTSTXT_OBEY = True
 ```
 
+## scrapy shell
+
+```bash
+# 1.新建项目
+scrapy startproject 项目名字  
+
+# 2.新建爬虫
+scrapy genspider 爬虫名字 域名  # 新建爬虫
+scrapy genspider [-t 模板] 爬虫名字 域名  # 新建爬虫
+scrapy genspider -l  # 查看爬虫模板
+# 可以用模板，可以自定义模板:
+#  basic
+#  crawl
+#  csvfeed
+#  xmlfeed
+
+# 3.启动爬虫
+scrapy crawl 爬虫名字   # 必须是一个生成的爬虫
+scrapy runspider 爬虫.py  # 运行一个爬虫，不必创建一个scrapy项目(常用于scrapy-redis)
+
+
+# 4.检查和查看可用爬虫
+scrapy check 
+scrapy check -l
+scrapy list
+
+# 5.shell 
+scrapy shell [url]
+
+# 6.版本
+scrapy version
+```
+
+
+
 
 
 文件介绍
@@ -266,5 +301,63 @@ class JySpider(scrapy.Spider):
             self.page += 1
             url = self.base_url + str(self.page) + '-cp01.22.07.01.00.00.html'
             yield scrapy.Request(url,callback=self.parse)
+```
+
+## 链接提取器
+
+```python
+from scrapy.linkextractors import LinkExtractor
+# LinkExtractor能够自动提取链接
+```
+
+```python
+ # 参数 
+    def __init__(
+        self,
+        allow=(),   # 正则，提取符合正则的链接
+        deny=(),    # 正则，不提取符合正则的链接
+        allow_domains=(),
+        deny_domains=(),
+        restrict_xpaths=(),
+        tags=("a", "area"),
+        attrs=("href",),
+        canonicalize=False,
+        unique=True,
+        process_value=None,
+        deny_extensions=None,
+        restrict_css=(),
+        strip=True,
+        restrict_text=None,
+    ):
+```
+
+## 模拟登陆
+
+### 修改cookies
+
+```python
+# spider.py 爬虫文件
+# 重写start_requests方法
+    def start_requests(self):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+            'Referer': 'https://user.17k.com/www/bookshelf/subscription.html',
+        }
+        
+        cookie_str = '复制过来的cookie字符串'
+        # 把cookie字符串分割为字典
+        cookies = {cookie.split("=")[0].strip(): cookie.split("=")[1].strip() for cookie in cookie_str.split("; ")}
+
+        for url in self.start_urls:
+            yield scrapy.Request(url=url,
+                                 headers=headers,
+                                 cookies=cookies,
+                                 dont_filter=True)
+```
+
+### 登陆
+
+```python
+
 ```
 

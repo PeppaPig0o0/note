@@ -1,0 +1,25 @@
+requests ✓
+lxml ✓
+parsel 
+
+scrapy 1 
+splash
+scrapyd 2
+scrapy-redis 3
+
+selenium ✓
+pyppeteer
+playwright
+
+js逆向（js） 4
+APP爬取 5 appnium？
+app逆向
+
+cookie池 
+IP池
+
+mongodb 7 
+redis 6
+
+celery 8 
+rabbitMQ 9
